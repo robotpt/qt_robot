@@ -5,7 +5,7 @@ from std_srvs.srv import Trigger
 
 if __name__ == "__main__":
 	rospy.sleep(3)
-	service_name = rospy.get_param('qt_robot/display/start_browser_on_pi_service')
+	service_name = rospy.get_param('qt_robot/face/start_browser_on_pi_service')
 	rospy.wait_for_service(service_name)
 	service_call = rospy.ServiceProxy(service_name, Trigger)
 	try:
