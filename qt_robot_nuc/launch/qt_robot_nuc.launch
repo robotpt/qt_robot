@@ -1,0 +1,6 @@
+<launch>
+
+    <rosparam file="$(find qt_robot_config)/config.yaml" command="load" />
+    <node pkg="qt_robot_nuc" type="start_face_client.py" name="start_face_client" output="screen"/>
+
+</launch>
