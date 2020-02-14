@@ -1,0 +1,5 @@
+qt_robot:
+  face:
+    start_browser_on_pi_service: "qt_robot/display/start_browser_on_pi"
+    url: "http://192.168.100.2:8081"
+
