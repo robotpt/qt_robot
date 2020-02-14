@@ -7,10 +7,10 @@ LOG_FILE=$(prepare_logfile "$SCRIPT_NAME")
 
 {
 prepare_ros_environment
-wait_for_ros_node "/DB1/face" 60
 wait_for_tcpip_port 1883 60
 
-roslaunch cordial_example server_for_browser_on_pi.launch
+roslaunch qt_robot_pi qt_robot_pi.launch
+roslaunch cordial_sound sound_listener.launch
 
 } &>> ${LOG_FILE}
 
