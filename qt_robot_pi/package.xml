@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>qt_robot_head</name>
+  <name>qt_robot_pi</name>
   <version>0.0.0</version>
-  <description>The qt_robot_head package</description>
+  <description>The qt_robot_pi package</description>
 
   <maintainer email="audrow.nash@gmail.com">Audrow Nash</maintainer>
 
