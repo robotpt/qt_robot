@@ -3,4 +3,5 @@
     <rosparam file="$(find qt_robot_config)/config.yaml" command="load" />
     <node pkg="qt_robot_pi" type="start_face_server.py" name="start_face_server" output="screen"/>
 
+    <include file="$(find cordial_sound)/launch/sound_listener.launch" />
 </launch>
