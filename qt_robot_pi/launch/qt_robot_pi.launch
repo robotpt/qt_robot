@@ -4,4 +4,7 @@
     <node pkg="qt_robot_pi" type="start_face_server.py" name="start_face_server" output="screen"/>
 
     <include file="$(find cordial_sound)/launch/sound_listener.launch" />
+    <include file="$(find audio_capture)/launch/capture.launch">
+        <arg name="format" value="wave"/>
+    </include>
 </launch>
