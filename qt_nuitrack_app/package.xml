@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>qt_nuitrack_msgs</name>
+  <name>qt_nuitrack_app</name>
   <version>1.0.0</version>
   <description>Message definitions for QT's Nuitrack data</description>
 
