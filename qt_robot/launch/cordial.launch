@@ -1,0 +1,66 @@
+<launch>
+
+    <arg name="face_port" default="8081"/>
+    <arg name="gui_port" default="8082"/>
+
+    <arg name="is_launch_sound_listener" default="false" />
+
+    <arg name="is_launch_aws_uploader" default="false" />
+    <arg name="is_record_audio" default="false" />
+    <arg name="is_record_video" default="false" />
+    <arg name="upload_directory" value="/root/upload" />
+
+    <arg name="mongodb_path" default="/root/mongodb_log" />
+    <arg name="mongodb_port" default="62345" />
+
+
+    <!-- Launch Cordial -->
+    <include file="$(find cordial_manager)/launch/manager.launch">
+        <arg name="face_port" value="$(arg face_port)"/>
+        <arg name="gui_port" value="$(arg gui_port)"/>
+        <arg name="is_launch_sound_listener" default="$(arg is_launch_sound_listener)" />
+    </include>
+
+
+    <!-- Launch data capture services -->
+    <group if="$(arg is_launch_aws_uploader)">
+        <include file="$(find aws_uploader)/launch/aws_uploader.launch">
+            <arg name="upload_directory_path" default="$(arg upload_directory)"/>
+            <arg name="bucket_name" default="$(env AWS_BUCKET_NAME)"/>
+        </include>
+    </group>
+    <group if="$(arg is_record_video)">
+        <include file="$(find video_capture)/launch/capture.launch">
+            <arg name="output_directory" value="$(arg upload_directory)"/>
+            <arg name="image_topic" value="camera/color/image_raw"/>
+            <arg name="is_record_topic" value="data_capture/is_record"/>
+        </include>
+    </group>
+    <group if="$(arg is_record_audio)">
+        <include file="$(find audio_capture2)/launch/capture.launch">
+            <arg name="output_directory" value="$(arg upload_directory)"/>
+            <arg name="audio_topic" value="audio/audio"/>
+            <arg name="is_record_topic" value="data_capture/is_record"/>
+            <arg name="is_launch_audio_capture" value="true"/>
+        </include>
+    </group>
+
+
+    <!-- MongoDB log -->
+    <include file="$(find mongodb_store)/launch/mongodb_store.launch">
+    	<arg name="db_path" value="$(arg mongodb_path)" />
+        <arg name="port" value="$(arg mongodb_port)" />
+    </include>
+    <!--
+    For some reason passing the topics in as args doesn't seem to work
+    This is a work around.
+    -->
+    <node pkg="qt_robot" type="record_topics.sh" name="mongodb_log" respawn="true" output="screen" />
+
+    <!-- Launch QT NUC -->
+    <include file="$(find qt_robot_nuc)/launch/qt_robot_nuc.launch"/>
+
+    <!-- Relay gesture messages to QT robot -->
+    <node pkg="topic_tools" type="relay" name="gesture_relay" args="/cordial/gesture/play /qt_robot/gesture/play" />
+
+</launch>
