@@ -3,8 +3,25 @@
 #include <sensor_msgs/JointState.h>
 #include <tf/transform_broadcaster.h>
 #include <std_msgs/String.h>
+#include <fstream>
+#include <iostream>
 
+using namespace std;
 
+//void read_file(string filename){
+//    vector<vector<int>> positions;
+//    ofstream feature_file(filename);
+//    if(feature_file.is_open()){
+//        string line;
+//        while(std::getline(feature_file, line)){
+//            cout << line << '\n';
+//        }
+//        feature_file.close();
+//    }
+//    else{
+//        cout << "Unable to open file";
+//    }
+//}
 int main(int argc, char** argv) {
     ros::init(argc, argv, "state_publisher");
     ros::NodeHandle n;
@@ -23,6 +40,9 @@ int main(int argc, char** argv) {
 
     ros::Duration(5, 0).sleep();
     int state = 0;
+
+//    read_file("../features/wave_hand.feature");
+//    cout << "read files" << endl;
 
     while (ros::ok()) {
         //update joint_state
