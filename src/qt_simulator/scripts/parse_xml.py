@@ -21,9 +21,6 @@ def parse_xml_file(file_path):
                 val.append(float(point.find(key).text))
         time.append(point.get('time'))
 
-    print(time)
-    print(data)
-
 
 if __name__ == '__main__':
     FILE_PATH = '../../../resources/gestures/QT/send_kiss.xml'
