@@ -13,7 +13,7 @@ import sys
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 # sys.path.append(os.path.join(dir_path, 'parse_xml.py'))
-FILE_PATH = os.path.join(dir_path, '../../../resources/gestures/QT/breathing_exercise.xml')
+FILE_PATH = os.path.join(dir_path, '../../../resources/gestures/QT/bye-bye.xml')
 
 
 def parse_xml_file(file_path):
