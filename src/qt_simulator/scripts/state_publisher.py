@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import os
 import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import JointState
@@ -7,12 +7,42 @@ import geometry_msgs.msg
 import roslib
 import tf
 from std_msgs.msg import Header
+# from src.qt_simulator.scripts.parse_xml import parse_xml_file
+import xml.etree.ElementTree as ET
+import sys
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+# sys.path.append(os.path.join(dir_path, 'parse_xml.py'))
+FILE_PATH = os.path.join(dir_path, '../../../resources/gestures/QT/breathing_exercise.xml')
+
+
+def parse_xml_file(file_path):
+    tree = ET.parse(file_path)
+    root = tree.getroot()
+
+    time = []
+    pos_data = {
+        'RightElbowRoll': [],
+        'RightShoulderPitch': [],
+        'RightShoulderRoll': [],
+        'LeftElbowRoll': [],
+        'LeftShoulderPitch': [],
+        'LeftShoulderRoll': []
+    }
+
+    for point in root.iter('point'):
+        for key, val in pos_data.items():
+            if point.find(key) is not None:
+                val.append(float(point.find(key).text))
+        time.append(point.get('time'))
+
+    return time, pos_data
+
 
 if __name__ == '__main__':
-
     broadcaster = tf.TransformBroadcaster()
     joint_pub = rospy.Publisher('joint_states', JointState, queue_size=10)
-    rospy.init_node('testing', anonymous=True)
+    rospy.init_node('state_publisher', anonymous=True)
     rate = rospy.Rate(30)  # 10hz
 
     odom_trans = geometry_msgs.msg.TransformStamped()
@@ -20,15 +50,11 @@ if __name__ == '__main__':
     odom_trans.child_frame_id = 'base_link'
 
     joint_state = JointState()
-
-    right_shoulder_pitch = 0
-    right_shoulder_roll = 0
-    right_elbow_roll = -0.5
-    step_size_RSP = 0.02
-    step_size_RSR = 0.02
-    step_size_RER = 0.02
     state = 0
-    rospy.sleep(5)
+    rospy.sleep(3)
+    num_state, data = parse_xml_file(FILE_PATH)
+    time_numeric = [int(numeric_string) for numeric_string in num_state]
+    time_difference = [time_numeric[i + 1] - time_numeric[i] for i in range(len(time_numeric) - 1)]
 
     while not rospy.is_shutdown():
         joint_state.header = Header()
@@ -36,7 +62,39 @@ if __name__ == '__main__':
 
         joint_state.name = ['HeadYaw', 'HeadPitch', 'RightShoulderPitch', 'RightShoulderRoll', 'RightElbowRoll',
                             'LeftShoulderPitch', 'LeftShoulderRoll', 'LeftElbowRoll']
-        joint_state.position = [0, 0, right_shoulder_pitch, right_shoulder_roll, right_elbow_roll, 1.14, -0.95, -0.87]
+
+        if len(data['RightShoulderPitch']) is not 0:
+            right_shoulder_pitch = data['RightShoulderPitch'][state] * 0.01
+        else:
+            right_shoulder_pitch = -1.42
+
+        if len(data['RightShoulderRoll']) is not 0:
+            right_shoulder_roll = data['RightShoulderRoll'][state] * 0.01
+        else:
+            right_shoulder_roll = -0.77
+
+        if len(data['RightElbowRoll']) is not 0:
+            right_elbow_roll = data['RightElbowRoll'][state] * 0.01
+        else:
+            right_elbow_roll = 0
+
+        if len(data['LeftShoulderPitch']) is not 0:
+            left_shoulder_pitch = data['LeftShoulderPitch'][state] * 0.01
+        else:
+            left_shoulder_pitch = 1.14
+
+        if len(data['LeftShoulderRoll']) is not 0:
+            left_shoulder_roll = data['LeftShoulderRoll'][state] * 0.01
+        else:
+            left_shoulder_roll = -0.95
+
+        if len(data['LeftElbowRoll']) is not 0:
+            left_elbow_roll = data['LeftElbowRoll'][state] * 0.01
+        else:
+            left_elbow_roll = -0.87
+
+        joint_state.position = [0, 0, right_shoulder_pitch, right_shoulder_roll, right_elbow_roll,
+                                left_shoulder_pitch, left_shoulder_roll, left_elbow_roll]
 
         odom_trans.header.stamp = rospy.Time.now()
         odom_trans.transform.translation.x = 0
@@ -50,19 +108,7 @@ if __name__ == '__main__':
 
         joint_pub.publish(joint_state)
         broadcaster.sendTransformMessage(odom_trans)
-        # broadcaster.sendTransform((0, 0, 0), (0, 0, 0), rospy.Time.now(),  'base_link', 'odom')
 
-        if state is 0:
-            right_elbow_roll -= step_size_RER
-            if right_elbow_roll < -1.25:
-                state = 1
-        elif state is 1:
-            right_shoulder_pitch += step_size_RSP
-            if right_shoulder_pitch > 1.58:
-                state = 2
-        elif state is 2:
-            right_elbow_roll += step_size_RER
-            if right_elbow_roll < -1.57 or right_elbow_roll > -1:
-                step_size_RER *= -1
-
+        state = state + 1
+        state = state % len(num_state)
         rate.sleep()
