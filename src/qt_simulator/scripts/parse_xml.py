@@ -6,7 +6,7 @@ def parse_xml_file(file_path):
     root = tree.getroot()
 
     time = []
-    data = {
+    pos_data = {
         'RightElbowRoll': [],
         'RightShoulderPitch': [],
         'RightShoulderRoll': [],
@@ -16,12 +16,12 @@ def parse_xml_file(file_path):
     }
 
     for point in root.iter('point'):
-        for key, val in data.items():
+        for key, val in pos_data.items():
             if point.find(key) is not None:
                 val.append(float(point.find(key).text))
         time.append(point.get('time'))
 
-    return time, data
+    return time, pos_data
 
 if __name__ == '__main__':
     FILE_PATH = '../../../resources/gestures/QT/hi.xml'
