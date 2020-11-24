@@ -212,6 +212,9 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
+catkin_install_python(PROGRAMS scripts/state_publisher.py scripts/gestures_play_client.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 add_executable(state_publisher src/state_publisher.cpp)

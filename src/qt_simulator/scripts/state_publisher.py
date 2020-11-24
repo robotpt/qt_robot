@@ -1,14 +1,15 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import os
 import rospy
 from sensor_msgs.msg import JointState
 import geometry_msgs.msg
 import tf
+import math
 from std_msgs.msg import Header
 import xml.etree.ElementTree as ET
-
 dir_path = os.path.dirname(os.path.realpath(__file__))
-FILE_PATH = os.path.join(dir_path, '../../../resources/gestures/QT/sneezing.xml')
+from qt_simulator.srv import gestures_play
 
 
 def parse_xml_file(file_path):
@@ -40,44 +41,44 @@ def parse_xml_file(file_path):
     return time_difference, pos_data
 
 
-def get_current_state(data):
+def get_current_state(data, state):
     if len(data['HeadYaw']) is not 0:
-        head_yaw = data['HeadYaw'][state] * 0.01
+        head_yaw = math.radians(data['HeadYaw'][state])
     else:
         head_yaw = 0
 
     if len(data['HeadPitch']) is not 0:
-        head_pitch = data['HeadPitch'][state] * 0.01
+        head_pitch = math.radians(data['HeadPitch'][state])
     else:
         head_pitch = 0
 
     if len(data['RightShoulderPitch']) is not 0:
-        right_shoulder_pitch = data['RightShoulderPitch'][state] * 0.01
+        right_shoulder_pitch = math.radians(data['RightShoulderPitch'][state])
     else:
         right_shoulder_pitch = -1.42
 
     if len(data['RightShoulderRoll']) is not 0:
-        right_shoulder_roll = data['RightShoulderRoll'][state] * 0.01
+        right_shoulder_roll = math.radians(data['RightShoulderRoll'][state])
     else:
         right_shoulder_roll = -0.77
 
     if len(data['RightElbowRoll']) is not 0:
-        right_elbow_roll = data['RightElbowRoll'][state] * 0.01
+        right_elbow_roll = math.radians(data['RightElbowRoll'][state])
     else:
         right_elbow_roll = 0
 
     if len(data['LeftShoulderPitch']) is not 0:
-        left_shoulder_pitch = data['LeftShoulderPitch'][state] * 0.01
+        left_shoulder_pitch = math.radians(data['LeftShoulderPitch'][state])
     else:
         left_shoulder_pitch = 1.14
 
     if len(data['LeftShoulderRoll']) is not 0:
-        left_shoulder_roll = data['LeftShoulderRoll'][state] * 0.01
+        left_shoulder_roll = math.radians(data['LeftShoulderRoll'][state])
     else:
         left_shoulder_roll = -0.95
 
     if len(data['LeftElbowRoll']) is not 0:
-        left_elbow_roll = data['LeftElbowRoll'][state] * 0.01
+        left_elbow_roll = math.radians(data['LeftElbowRoll'][state])
     else:
         left_elbow_roll = -0.87
 
@@ -85,14 +86,14 @@ def get_current_state(data):
                             left_shoulder_pitch, left_shoulder_roll, left_elbow_roll]
 
 
-def publish_joint_position(joint_state, odom_trans, joint_pub, data, broadcaster):
+def publish_joint_position(joint_state, odom_trans, joint_pub, data, broadcaster, state):
         joint_state.header = Header()
         joint_state.header.stamp = rospy.Time.now()
 
         joint_state.name = ['HeadYaw', 'HeadPitch', 'RightShoulderPitch', 'RightShoulderRoll', 'RightElbowRoll',
                             'LeftShoulderPitch', 'LeftShoulderRoll', 'LeftElbowRoll']
 
-        joint_state.position = get_current_state(data)
+        joint_state.position = get_current_state(data, state)
 
         odom_trans.header.stamp = rospy.Time.now()
         odom_trans.transform.translation.x = 0
@@ -108,8 +109,9 @@ def publish_joint_position(joint_state, odom_trans, joint_pub, data, broadcaster
         broadcaster.sendTransformMessage(odom_trans)
 
 
-
-if __name__ == '__main__':
+def gesture_play(req):
+    relative_file_path = '../../../resources/gestures/QT/' + req.a
+    FILE_PATH = os.path.join(dir_path, relative_file_path)
     broadcaster = tf.TransformBroadcaster()
     joint_pub = rospy.Publisher('joint_states', JointState, queue_size=10)
     rospy.init_node('state_publisher', anonymous=True)
@@ -123,8 +125,21 @@ if __name__ == '__main__':
     rospy.sleep(2)
     time_difference, data = parse_xml_file(FILE_PATH)
 
-    while not rospy.is_shutdown():
-        publish_joint_position(joint_state, odom_trans, joint_pub, data, broadcaster)
-        rospy.sleep(time_difference[state]*10**(-9))
+    while not rospy.is_shutdown() and state < len(time_difference):
+        publish_joint_position(joint_state, odom_trans, joint_pub, data, broadcaster, state)
+        rospy.sleep(time_difference[state] * 10 ** (-9))
         state = state + 1
-        state = state % len(time_difference)
+        # state = state % len(time_difference)
+
+    return True
+
+
+def gestures_play_server():
+    rospy.init_node('gestures_play_server')
+    s = rospy.Service('gestures_play', gestures_play, gesture_play)
+    print("Ready to play gestures")
+    rospy.spin()
+
+
+if __name__ == '__main__':
+    gestures_play_server()
