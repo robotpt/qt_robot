@@ -12,6 +12,18 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 from qt_simulator.srv import gestures_play
 
 
+DEFAULT_POS = {
+    'HeadYaw': 0,
+    'HeadPitch': 0,
+    'RightElbowRoll': 0,
+    'RightShoulderPitch': -1.42,
+    'RightShoulderRoll': -0.77,
+    'LeftElbowRoll': -0.87,
+    'LeftShoulderPitch': 1.14,
+    'LeftShoulderRoll': -0.95
+}
+
+
 def parse_xml_file(file_path):
     tree = ET.parse(file_path)
     root = tree.getroot()
@@ -41,46 +53,22 @@ def parse_xml_file(file_path):
     return time_difference, pos_data
 
 
+def get_joint_position(data, state, joint_name):
+    if len(data[joint_name]) is not 0:
+        return math.radians(data[joint_name][state])
+    else:
+        return DEFAULT_POS[joint_name]
+
+
 def get_current_state(data, state):
-    if len(data['HeadYaw']) is not 0:
-        head_yaw = math.radians(data['HeadYaw'][state])
-    else:
-        head_yaw = 0
-
-    if len(data['HeadPitch']) is not 0:
-        head_pitch = math.radians(data['HeadPitch'][state])
-    else:
-        head_pitch = 0
-
-    if len(data['RightShoulderPitch']) is not 0:
-        right_shoulder_pitch = math.radians(data['RightShoulderPitch'][state])
-    else:
-        right_shoulder_pitch = -1.42
-
-    if len(data['RightShoulderRoll']) is not 0:
-        right_shoulder_roll = math.radians(data['RightShoulderRoll'][state])
-    else:
-        right_shoulder_roll = -0.77
-
-    if len(data['RightElbowRoll']) is not 0:
-        right_elbow_roll = math.radians(data['RightElbowRoll'][state])
-    else:
-        right_elbow_roll = 0
-
-    if len(data['LeftShoulderPitch']) is not 0:
-        left_shoulder_pitch = math.radians(data['LeftShoulderPitch'][state])
-    else:
-        left_shoulder_pitch = 1.14
-
-    if len(data['LeftShoulderRoll']) is not 0:
-        left_shoulder_roll = math.radians(data['LeftShoulderRoll'][state])
-    else:
-        left_shoulder_roll = -0.95
-
-    if len(data['LeftElbowRoll']) is not 0:
-        left_elbow_roll = math.radians(data['LeftElbowRoll'][state])
-    else:
-        left_elbow_roll = -0.87
+    head_yaw = get_joint_position(data, state, 'HeadYaw')
+    head_pitch = get_joint_position(data, state, 'HeadPitch')
+    right_shoulder_pitch = get_joint_position(data, state, 'RightShoulderPitch')
+    right_shoulder_roll = get_joint_position(data, state, 'RightShoulderRoll')
+    right_elbow_roll = get_joint_position(data, state, 'RightElbowRoll')
+    left_shoulder_pitch = get_joint_position(data, state, 'LeftShoulderPitch')
+    left_shoulder_roll = get_joint_position(data, state, 'LeftShoulderRoll')
+    left_elbow_roll = get_joint_position(data, state, 'LeftElbowRoll')
 
     return [head_yaw, head_pitch, right_shoulder_pitch, right_shoulder_roll, right_elbow_roll,
                             left_shoulder_pitch, left_shoulder_roll, left_elbow_roll]
