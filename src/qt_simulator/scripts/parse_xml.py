@@ -7,6 +7,8 @@ def parse_xml_file(file_path):
 
     time = []
     pos_data = {
+        'HeadYaw': [],
+        'HeadPitch': [],
         'RightElbowRoll': [],
         'RightShoulderPitch': [],
         'RightShoulderRoll': [],
@@ -21,28 +23,13 @@ def parse_xml_file(file_path):
                 val.append(float(point.find(key).text))
         time.append(point.get('time'))
 
-    return time, pos_data
+    time_numeric = [int(numeric_string) for numeric_string in time]
+    time_difference = [time_numeric[i + 1] - time_numeric[i] for i in range(len(time_numeric) - 1)]
+    time_difference.append(0)
+
+    return time_difference, pos_data
+
 
 if __name__ == '__main__':
     FILE_PATH = '../../../resources/gestures/QT/hi.xml'
     time, data = parse_xml_file(FILE_PATH)
-    # print(len(time))
-    # state = 0
-    # if len(data['RightShoulderPitch']) is not 0:
-    #     right_shoulder_pitch = data['RightShoulderPitch'][state]
-    # else:
-    #     right_shoulder_pitch = 0
-    #
-    # if len(data['RightShoulderRoll']) is not 0:
-    #     right_shoulder_roll = data['RightShoulderRoll'][state]
-    # else:
-    #     right_shoulder_roll = 0
-    #
-    # if len(data['RightElbowRoll']) is not 0:
-    #     right_elbow_roll = data['RightElbowRoll'][state]
-    # else:
-    #     right_elbow_roll = 0
-    #
-    # print(right_elbow_roll)
-    # print(right_shoulder_pitch)
-    # print(right_shoulder_roll)

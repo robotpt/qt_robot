@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import sys
 import rospy
-from qt_simulator.srv import gestures_play
+from src.qt_simulator.srv import gestures_play
 
 
 def gestures_play_client(file):

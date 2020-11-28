@@ -7,9 +7,9 @@ import geometry_msgs.msg
 import tf
 import math
 from std_msgs.msg import Header
-import xml.etree.ElementTree as ET
+from src.qt_simulator.srv import gestures_play
+from src.qt_simulator.scripts import parse_xml
 dir_path = os.path.dirname(os.path.realpath(__file__))
-from qt_simulator.srv import gestures_play
 
 
 DEFAULT_POS = {
@@ -22,35 +22,6 @@ DEFAULT_POS = {
     'LeftShoulderPitch': 1.14,
     'LeftShoulderRoll': -0.95
 }
-
-
-def parse_xml_file(file_path):
-    tree = ET.parse(file_path)
-    root = tree.getroot()
-
-    time = []
-    pos_data = {
-        'HeadYaw': [],
-        'HeadPitch': [],
-        'RightElbowRoll': [],
-        'RightShoulderPitch': [],
-        'RightShoulderRoll': [],
-        'LeftElbowRoll': [],
-        'LeftShoulderPitch': [],
-        'LeftShoulderRoll': []
-    }
-
-    for point in root.iter('point'):
-        for key, val in pos_data.items():
-            if point.find(key) is not None:
-                val.append(float(point.find(key).text))
-        time.append(point.get('time'))
-
-    time_numeric = [int(numeric_string) for numeric_string in time]
-    time_difference = [time_numeric[i + 1] - time_numeric[i] for i in range(len(time_numeric) - 1)]
-    time_difference.append(0)
-
-    return time_difference, pos_data
 
 
 def get_joint_position(data, state, joint_name):
@@ -111,7 +82,7 @@ def gesture_play(req):
     joint_state = JointState()
     state = 0
     rospy.sleep(2)
-    time_difference, data = parse_xml_file(FILE_PATH)
+    time_difference, data = parse_xml.parse_xml_file(FILE_PATH)
 
     while not rospy.is_shutdown() and state < len(time_difference):
         publish_joint_position(joint_state, odom_trans, joint_pub, data, broadcaster, state)
