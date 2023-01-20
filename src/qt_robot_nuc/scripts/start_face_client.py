@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3.8
 
 import rospy
 from std_srvs.srv import Trigger
@@ -11,5 +11,5 @@ if __name__ == "__main__":
 	try:
 		response = service_call()
 		print(response)
-	except rospy.ServiceException, e:
+	except rospy.ServiceException as e:
 		print("Service call failed: %s" % e)
