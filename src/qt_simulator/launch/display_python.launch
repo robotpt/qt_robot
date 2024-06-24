@@ -1,0 +1,8 @@
+<launch>
+        <param name="robot_description" command="cat $(find qt_simulator)/urdf/qtrobot.urdf" />
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+<!--        <node name="state_publisher" pkg="qt_simulator" type="state_publisher" />-->
+        <node pkg="qt_simulator" type="state_publisher.py" name="state_publisher"/>
+<!--        <param name="publish_frequency" type="double" value="10.0" />-->
+        <node name="rviz" pkg="rviz" type="rviz" args=""/>
+</launch>

@@ -1,0 +1,4 @@
+# an array of gesture files (e.g. ['sneezing.xml', 'show_left.xml', 'sad.xml'])
+string[] gestures
+---
+bool status
